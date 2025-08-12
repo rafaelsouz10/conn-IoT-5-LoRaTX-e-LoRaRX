@@ -7,160 +7,160 @@
 #include <stdbool.h>
 
 // === Mapeamento de pinos com base na placa LORA/SD conectada na BitDogLab ===
-#define PIN_CS   17      // Chip Select - seleção do dispositivo SPI
-#define PIN_RST  20      // Reset - reinicia o módulo LoRa
-#define PIN_DIO0 8       // Digital I/O 0 - usado para interrupções (TX/RX done)
+#define PIN_CS   17      // Chip Select - seleï¿½ï¿½o do dispositivo SPI
+#define PIN_RST  20      // Reset - reinicia o mï¿½dulo LoRa
+#define PIN_DIO0 8       // Digital I/O 0 - usado para interrupï¿½ï¿½es (TX/RX done)
 
 #define SPI_PORT spi0    // Porta SPI utilizada (spi0)
-#define PIN_MISO 16      // Master In Slave Out - dados do módulo para o microcontrolador
-#define PIN_MOSI 19      // Master Out Slave In - dados do microcontrolador para o módulo
-#define PIN_SCK  18      // Serial Clock - sinal de clock para sincronização SPI
+#define PIN_MISO 16      // Master In Slave Out - dados do mï¿½dulo para o microcontrolador
+#define PIN_MOSI 19      // Master Out Slave In - dados do microcontrolador para o mï¿½dulo
+#define PIN_SCK  18      // Serial Clock - sinal de clock para sincronizaï¿½ï¿½o SPI
 
-// === Registradores do SX1276 - Mapeamento dos endereços de memória ===
+// === Registradores do SX1276 - Mapeamento dos endereï¿½os de memï¿½ria ===
 #define REG_FIFO           0x00  // Buffer FIFO para dados TX/RX
-#define REG_OP_MODE        0x01  // Modo de operação (LoRa, FSK, Sleep, TX, RX, etc.)
-#define REG_FRF_MSB        0x06  // Frequência da portadora - byte mais significativo
-#define REG_FRF_MID        0x07  // Frequência da portadora - byte do meio
-#define REG_FRF_LSB        0x08  // Frequência da portadora - byte menos significativo
-#define REG_PA_CONFIG      0x09  // Configuração do amplificador de potência
-#define REG_FIFO_ADDR_PTR  0x0D  // Ponteiro de endereço FIFO
-#define REG_FIFO_TX_BASE   0x0E  // Endereço base FIFO para transmissão
-#define REG_FIFO_RX_BASE   0x0F  // Endereço base FIFO para recepção
-#define REG_IRQ_FLAGS      0x12  // Flags de interrupção (TX done, RX done, etc.)
-#define REG_RX_NB_BYTES    0x13  // Número de bytes recebidos
+#define REG_OP_MODE        0x01  // Modo de operaï¿½ï¿½o (LoRa, FSK, Sleep, TX, RX, etc.)
+#define REG_FRF_MSB        0x06  // Frequï¿½ncia da portadora - byte mais significativo
+#define REG_FRF_MID        0x07  // Frequï¿½ncia da portadora - byte do meio
+#define REG_FRF_LSB        0x08  // Frequï¿½ncia da portadora - byte menos significativo
+#define REG_PA_CONFIG      0x09  // Configuraï¿½ï¿½o do amplificador de potï¿½ncia
+#define REG_FIFO_ADDR_PTR  0x0D  // Ponteiro de endereï¿½o FIFO
+#define REG_FIFO_TX_BASE   0x0E  // Endereï¿½o base FIFO para transmissï¿½o
+#define REG_FIFO_RX_BASE   0x0F  // Endereï¿½o base FIFO para recepï¿½ï¿½o
+#define REG_IRQ_FLAGS      0x12  // Flags de interrupï¿½ï¿½o (TX done, RX done, etc.)
+#define REG_RX_NB_BYTES    0x13  // Nï¿½mero de bytes recebidos
 #define REG_PKT_RSSI       0x1A  // Intensidade do sinal recebido (RSSI)
-#define REG_MODEM_CONFIG1  0x1D  // Configuração do modem: Bandwidth, Coding Rate, Header
-#define REG_MODEM_CONFIG2  0x1E  // Configuração do modem: Spreading Factor, CRC
-#define REG_PREAMBLE_MSB   0x20  // Comprimento do preâmbulo - byte mais significativo
-#define REG_PREAMBLE_LSB   0x21  // Comprimento do preâmbulo - byte menos significativo
-#define REG_VERSION        0x42  // Versão do chip (0x12 para SX1276)
+#define REG_MODEM_CONFIG1  0x1D  // Configuraï¿½ï¿½o do modem: Bandwidth, Coding Rate, Header
+#define REG_MODEM_CONFIG2  0x1E  // Configuraï¿½ï¿½o do modem: Spreading Factor, CRC
+#define REG_PREAMBLE_MSB   0x20  // Comprimento do preï¿½mbulo - byte mais significativo
+#define REG_PREAMBLE_LSB   0x21  // Comprimento do preï¿½mbulo - byte menos significativo
+#define REG_VERSION        0x42  // Versï¿½o do chip (0x12 para SX1276)
 #define REG_PAYLOAD_LEN    0x22  // Comprimento do payload
-#define REG_MODEM_CONFIG3  0x26  // Configuração adicional: Low Data Rate Optimizer, AGC
+#define REG_MODEM_CONFIG3  0x26  // Configuraï¿½ï¿½o adicional: Low Data Rate Optimizer, AGC
 
-// === Modos de operação - Valores para o registrador REG_OP_MODE ===
+// === Modos de operaï¿½ï¿½o - Valores para o registrador REG_OP_MODE ===
 #define MODE_LONG_RANGE_MODE  0x80  // Habilita o modo LoRa (bit 7 = 1)
-#define MODE_TX               0x83  // Modo de transmissão: LoRa + TX
-#define MODE_RX_CONTINUOUS    0x85  // Modo de recepção contínua: LoRa + RX
-#define PA_BOOST              0x80  // Habilita o amplificador PA_BOOST para alta potência
+#define MODE_TX               0x83  // Modo de transmissï¿½o: LoRa + TX
+#define MODE_RX_CONTINUOUS    0x85  // Modo de recepï¿½ï¿½o contï¿½nua: LoRa + RX
+#define PA_BOOST              0x80  // Habilita o amplificador PA_BOOST para alta potï¿½ncia
 
-// === Reset do LoRa - Reinicialização por hardware ===
+// === Reset do LoRa - Reinicializaï¿½ï¿½o por hardware ===
 static void sx127x_reset() {
-    gpio_put(PIN_RST, 0);    // Coloca o pino de reset em nível baixo
+    gpio_put(PIN_RST, 0);    // Coloca o pino de reset em nï¿½vel baixo
     sleep_ms(100);           // Aguarda 100ms para garantir o reset
-    gpio_put(PIN_RST, 1);    // Libera o reset (nível alto)
-    sleep_ms(100);           // Aguarda estabilização após o reset
+    gpio_put(PIN_RST, 1);    // Libera o reset (nï¿½vel alto)
+    sleep_ms(100);           // Aguarda estabilizaï¿½ï¿½o apï¿½s o reset
 }
 
 // === Leitura de registrador via SPI ===
 static uint8_t sx127x_read_reg(uint8_t addr) {
-    uint8_t tx[] = { addr & 0x7F, 0x00 };  // Bit 7 = 0 para leitura, endereço + dummy byte
+    uint8_t tx[] = { addr & 0x7F, 0x00 };  // Bit 7 = 0 para leitura, endereï¿½o + dummy byte
     uint8_t rx[2];                         // Buffer para receber dados
     gpio_put(PIN_CS, 0);                   // Seleciona o dispositivo (CS baixo)
-    spi_write_read_blocking(SPI_PORT, tx, rx, 2);  // Transferência SPI bidirecional
-    gpio_put(PIN_CS, 1);                   // Libera a seleção (CS alto)
+    spi_write_read_blocking(SPI_PORT, tx, rx, 2);  // Transferï¿½ncia SPI bidirecional
+    gpio_put(PIN_CS, 1);                   // Libera a seleï¿½ï¿½o (CS alto)
     return rx[1];                          // Retorna o dado lido (segundo byte)
 }
 
 // === Escrita de registrador via SPI ===
 static void sx127x_write_reg(uint8_t addr, uint8_t value) {
-    uint8_t tx[] = { addr | 0x80, value }; // Bit 7 = 1 para escrita, endereço + valor
+    uint8_t tx[] = { addr | 0x80, value }; // Bit 7 = 1 para escrita, endereï¿½o + valor
     gpio_put(PIN_CS, 0);                   // Seleciona o dispositivo (CS baixo)
-    spi_write_blocking(SPI_PORT, tx, 2);   // Transferência SPI (apenas escrita)
-    gpio_put(PIN_CS, 1);                   // Libera a seleção (CS alto)
+    spi_write_blocking(SPI_PORT, tx, 2);   // Transferï¿½ncia SPI (apenas escrita)
+    gpio_put(PIN_CS, 1);                   // Libera a seleï¿½ï¿½o (CS alto)
 }
 
-// === Inicialização do módulo SX1276 - RECEPTOR ===
+// === Inicializaï¿½ï¿½o do mï¿½dulo SX1276 - RECEPTOR ===
 bool sx127x_init() {
-    // ========== INICIALIZAÇÃO DO HARDWARE ==========
+    // ========== INICIALIZAï¿½ï¿½O DO HARDWARE ==========
     // Configura SPI com velocidade de 1 MHz
     spi_init(SPI_PORT, 1 * 1000 * 1000);
     
-    // Define as funções dos pinos GPIO para SPI
-    gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);  // Configura MISO como função SPI
-    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);  // Configura MOSI como função SPI
-    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);   // Configura SCK como função SPI
+    // Define as funï¿½ï¿½es dos pinos GPIO para SPI
+    gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);  // Configura MISO como funï¿½ï¿½o SPI
+    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);  // Configura MOSI como funï¿½ï¿½o SPI
+    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);   // Configura SCK como funï¿½ï¿½o SPI
 
-    // Configura pinos de controle como GPIO de saída/entrada
-    gpio_init(PIN_CS); gpio_set_dir(PIN_CS, GPIO_OUT); gpio_put(PIN_CS, 1);    // CS como saída, inicialmente alto
-    gpio_init(PIN_RST); gpio_set_dir(PIN_RST, GPIO_OUT);                       // RST como saída
-    gpio_init(PIN_DIO0); gpio_set_dir(PIN_DIO0, GPIO_IN);                      // DIO0 como entrada (interrupções)
+    // Configura pinos de controle como GPIO de saï¿½da/entrada
+    gpio_init(PIN_CS); gpio_set_dir(PIN_CS, GPIO_OUT); gpio_put(PIN_CS, 1);    // CS como saï¿½da, inicialmente alto
+    gpio_init(PIN_RST); gpio_set_dir(PIN_RST, GPIO_OUT);                       // RST como saï¿½da
+    gpio_init(PIN_DIO0); gpio_set_dir(PIN_DIO0, GPIO_IN);                      // DIO0 como entrada (interrupï¿½ï¿½es)
 
-    // Reset por hardware do módulo
+    // Reset por hardware do mï¿½dulo
     sx127x_reset();
 
-    // ========== VERIFICAÇÃO DO CHIP ==========
-    // Verifica se o chip está respondendo corretamente
+    // ========== VERIFICAï¿½ï¿½O DO CHIP ==========
+    // Verifica se o chip estï¿½ respondendo corretamente
     uint8_t version = sx127x_read_reg(REG_VERSION);
     if (version != 0x12) return false;  // SX1276 deve retornar 0x12
 
-    // ========== CONFIGURAÇÃO BÁSICA ==========
+    // ========== CONFIGURAï¿½ï¿½O Bï¿½SICA ==========
     // Habilita o modo LoRa e coloca em standby
     sx127x_write_reg(REG_OP_MODE, MODE_LONG_RANGE_MODE);
 
-    // ========== CONFIGURAÇÃO DE FREQUÊNCIA ==========
-    // Frequência = 915 MHz (915.000.000 Hz) - DEVE SER IGUAL AO TRANSMISSOR
-    // Cálculo: Frf = (Freq × 2^19) / 32MHz = 915000000 × 524288 / 32000000 = 14991360 = 0xE4C000
-    sx127x_write_reg(REG_FRF_MSB, 0xE4);  // Byte mais significativo da frequência
-    sx127x_write_reg(REG_FRF_MID, 0xC0);  // Byte do meio da frequência
-    sx127x_write_reg(REG_FRF_LSB, 0x00);  // Byte menos significativo da frequência
+    // ========== CONFIGURAï¿½ï¿½O DE FREQUï¿½NCIA ==========
+    // Frequï¿½ncia = 915 MHz (915.000.000 Hz) - DEVE SER IGUAL AO TRANSMISSOR
+    // Cï¿½lculo: Frf = (Freq ï¿½ 2^19) / 32MHz = 915000000 ï¿½ 524288 / 32000000 = 14991360 = 0xE4C000
+    sx127x_write_reg(REG_FRF_MSB, 0xE4);  // Byte mais significativo da frequï¿½ncia
+    sx127x_write_reg(REG_FRF_MID, 0xC0);  // Byte do meio da frequï¿½ncia
+    sx127x_write_reg(REG_FRF_LSB, 0x00);  // Byte menos significativo da frequï¿½ncia
 
-    // ========== CONFIGURAÇÃO DE POTÊNCIA DE TRANSMISSÃO ==========
-    // NOTA: Para receptor, a potência TX não é crítica, mas mantém-se compatível
-    // Potência de transmissão = 17 dBm (mesmo do transmissor para compatibilidade)
+    // ========== CONFIGURAï¿½ï¿½O DE POTï¿½NCIA DE TRANSMISSï¿½O ==========
+    // NOTA: Para receptor, a potï¿½ncia TX nï¿½o ï¿½ crï¿½tica, mas mantï¿½m-se compatï¿½vel
+    // Potï¿½ncia de transmissï¿½o = 17 dBm (mesmo do transmissor para compatibilidade)
     sx127x_write_reg(REG_PA_CONFIG, PA_BOOST | 0x0F);
 
-    // ========== CONFIGURAÇÃO DO MODEM - REGISTRADOR 1 ==========
+    // ========== CONFIGURAï¿½ï¿½O DO MODEM - REGISTRADOR 1 ==========
     // REG_MODEM_CONFIG1 = 0x73 (01110011) - DEVE SER IGUAL AO TRANSMISSOR
     // Bits 7-5: Bandwidth = 0111 (125 kHz)
-    // Bits 4-2: Coding Rate = 001 (4/5 - taxa de correção de erro)
-    // Bit 1: ImplicitHeaderModeOn = 1 (Header implícito = DISABLED)
+    // Bits 4-2: Coding Rate = 001 (4/5 - taxa de correï¿½ï¿½o de erro)
+    // Bit 1: ImplicitHeaderModeOn = 1 (Header implï¿½cito = DISABLED)
     // Bit 0: Reserved = 1
     sx127x_write_reg(REG_MODEM_CONFIG1, 0x73);  // 0x73 (Header DISABLED)
 
-    // ========== CONFIGURAÇÃO DO MODEM - REGISTRADOR 2 ==========
+    // ========== CONFIGURAï¿½ï¿½O DO MODEM - REGISTRADOR 2 ==========
     // REG_MODEM_CONFIG2 = 0x70 (01110000) - DEVE SER IGUAL AO TRANSMISSOR
     // Bits 7-4: Spreading Factor = 0111 (SF7)
     // Bit 3: TxContinuousMode = 0 (modo normal)
     // Bit 2: RxPayloadCrcOn = 0 (CRC desabilitado)
-    // Bits 1-0: SymbTimeout = 00 (timeout padrão)
+    // Bits 1-0: SymbTimeout = 00 (timeout padrï¿½o)
     sx127x_write_reg(REG_MODEM_CONFIG2, 0x70);  // 0x70 (SF=7, CRC=OFF)
 
-    // ========== CONFIGURAÇÃO DO PREÂMBULO ==========
-    // *** ADICIONADO *** Preâmbulo = 8 símbolos - DEVE SER IGUAL AO TRANSMISSOR
-    // O preâmbulo é usado para sincronização entre transmissor e receptor
+    // ========== CONFIGURAï¿½ï¿½O DO PREï¿½MBULO ==========
+    // *** ADICIONADO *** Preï¿½mbulo = 8 sï¿½mbolos - DEVE SER IGUAL AO TRANSMISSOR
+    // O preï¿½mbulo ï¿½ usado para sincronizaï¿½ï¿½o entre transmissor e receptor
     sx127x_write_reg(REG_PREAMBLE_MSB, 0x00);  // MSB = 0 (total = 8)
-    sx127x_write_reg(REG_PREAMBLE_LSB, 0x08);  // LSB = 8 símbolos
+    sx127x_write_reg(REG_PREAMBLE_LSB, 0x08);  // LSB = 8 sï¿½mbolos
 
-    // ========== CONFIGURAÇÃO DO MODEM - REGISTRADOR 3 ==========
+    // ========== CONFIGURAï¿½ï¿½O DO MODEM - REGISTRADOR 3 ==========
     // *** ADICIONADO *** REG_MODEM_CONFIG3 = 0x04 (00000100)
-    // Bit 3: LowDataRateOptimize = 0 (otimização para baixa taxa desabilitada)
-    // Bit 2: AgcAutoOn = 1 (controle automático de ganho habilitado)
+    // Bit 3: LowDataRateOptimize = 0 (otimizaï¿½ï¿½o para baixa taxa desabilitada)
+    // Bit 2: AgcAutoOn = 1 (controle automï¿½tico de ganho habilitado)
     // Outros bits: reservados = 0
     sx127x_write_reg(REG_MODEM_CONFIG3, 0x04);
 
-    // ========== CONFIGURAÇÃO DO PAYLOAD ==========
+    // ========== CONFIGURAï¿½ï¿½O DO PAYLOAD ==========
     // *** ADICIONADO *** Define o comprimento fixo do payload = 10 bytes
-    // No modo de header implícito, o comprimento DEVE ser igual ao transmissor
-    sx127x_write_reg(REG_PAYLOAD_LEN, 10);
+    // No modo de header implï¿½cito, o comprimento DEVE ser igual ao transmissor
+    sx127x_write_reg(REG_PAYLOAD_LEN, 25);
 
-    // ========== CONFIGURAÇÃO DO BUFFER FIFO ==========
-    // Define os endereços base para transmissão e recepção no buffer FIFO
-    sx127x_write_reg(REG_FIFO_TX_BASE, 0x00);  // Base TX no início do FIFO
-    sx127x_write_reg(REG_FIFO_RX_BASE, 0x00);  // Base RX no início do FIFO
+    // ========== CONFIGURAï¿½ï¿½O DO BUFFER FIFO ==========
+    // Define os endereï¿½os base para transmissï¿½o e recepï¿½ï¿½o no buffer FIFO
+    sx127x_write_reg(REG_FIFO_TX_BASE, 0x00);  // Base TX no inï¿½cio do FIFO
+    sx127x_write_reg(REG_FIFO_RX_BASE, 0x00);  // Base RX no inï¿½cio do FIFO
 
-    return true;  // Inicialização bem-sucedida
+    return true;  // Inicializaï¿½ï¿½o bem-sucedida
 }
 
 // === Envia uma mensagem via LoRa ===
 bool sx127x_send_message(const char *msg) {
     int len = strlen(msg);
-    if (len > 255) return false;  // Verifica se a mensagem não excede o limite
+    if (len > 255) return false;  // Verifica se a mensagem nï¿½o excede o limite
 
-    // ========== PREPARAÇÃO PARA TRANSMISSÃO ==========
-    // Coloca o módulo em modo standby (LoRa habilitado)
+    // ========== PREPARAï¿½ï¿½O PARA TRANSMISSï¿½O ==========
+    // Coloca o mï¿½dulo em modo standby (LoRa habilitado)
     sx127x_write_reg(REG_OP_MODE, MODE_LONG_RANGE_MODE);
     
-    // Aponta o ponteiro FIFO para o início do buffer de transmissão
+    // Aponta o ponteiro FIFO para o inï¿½cio do buffer de transmissï¿½o
     sx127x_write_reg(REG_FIFO_ADDR_PTR, 0x00);
 
     // ========== CARREGAMENTO DOS DADOS NO FIFO ==========
@@ -169,59 +169,59 @@ bool sx127x_send_message(const char *msg) {
         sx127x_write_reg(REG_FIFO, msg[i]);
     }
 
-    // ========== CONFIGURAÇÃO DO COMPRIMENTO ==========
+    // ========== CONFIGURAï¿½ï¿½O DO COMPRIMENTO ==========
     // Define o comprimento da mensagem a ser transmitida
-    // NOTA: Isso sobrescreve o valor fixo definido na inicialização
+    // NOTA: Isso sobrescreve o valor fixo definido na inicializaï¿½ï¿½o
     sx127x_write_reg(REG_PAYLOAD_LEN, len);
 
-    // ========== INÍCIO DA TRANSMISSÃO ==========
-    // Coloca o módulo em modo de transmissão
+    // ========== INï¿½CIO DA TRANSMISSï¿½O ==========
+    // Coloca o mï¿½dulo em modo de transmissï¿½o
     sx127x_write_reg(REG_OP_MODE, MODE_TX);
 
-    // ========== AGUARDA CONCLUSÃO DA TRANSMISSÃO ==========
-    // Monitora a flag TxDone (bit 3) no registrador de interrupções
+    // ========== AGUARDA CONCLUSï¿½O DA TRANSMISSï¿½O ==========
+    // Monitora a flag TxDone (bit 3) no registrador de interrupï¿½ï¿½es
     while ((sx127x_read_reg(REG_IRQ_FLAGS) & 0x08) == 0) {
         tight_loop_contents();  // Loop otimizado para economizar energia
     }
 
-    // ========== LIMPEZA DA FLAG DE INTERRUPÇÃO ==========
-    // Limpa a flag TxDone para futuras transmissões
+    // ========== LIMPEZA DA FLAG DE INTERRUPï¿½ï¿½O ==========
+    // Limpa a flag TxDone para futuras transmissï¿½es
     sx127x_write_reg(REG_IRQ_FLAGS, 0x08);
     
-    return true;  // Transmissão bem-sucedida
+    return true;  // Transmissï¿½o bem-sucedida
 }
 
-// === Recebe uma mensagem via LoRa (modo contínuo) - FUNÇÃO PRINCIPAL DO RECEPTOR ===
+// === Recebe uma mensagem via LoRa (modo contï¿½nuo) - FUNï¿½ï¿½O PRINCIPAL DO RECEPTOR ===
 bool sx127x_receive_message(char *buf, uint8_t max_len) {
-    // ========== CONFIGURAÇÃO DO MODO DE RECEPÇÃO ==========
-    // Coloca o módulo em modo de recepção contínua
+    // ========== CONFIGURAï¿½ï¿½O DO MODO DE RECEPï¿½ï¿½O ==========
+    // Coloca o mï¿½dulo em modo de recepï¿½ï¿½o contï¿½nua
     // IMPORTANTE: O receptor deve estar sempre neste modo para capturar mensagens
     sx127x_write_reg(REG_OP_MODE, MODE_RX_CONTINUOUS);
 
-    // ========== VERIFICAÇÃO DE MENSAGEM RECEBIDA ==========
-    // Verifica se a flag RxDone (bit 6) está ativa
+    // ========== VERIFICAï¿½ï¿½O DE MENSAGEM RECEBIDA ==========
+    // Verifica se a flag RxDone (bit 6) estï¿½ ativa
     // Esta flag indica que uma mensagem foi recebida com sucesso
     if ((sx127x_read_reg(REG_IRQ_FLAGS) & 0x40) == 0) return false;
 
-    // ========== LIMPEZA DA FLAG DE INTERRUPÇÃO ==========
-    // Limpa a flag RxDone para futuras recepções
+    // ========== LIMPEZA DA FLAG DE INTERRUPï¿½ï¿½O ==========
+    // Limpa a flag RxDone para futuras recepï¿½ï¿½es
     sx127x_write_reg(REG_IRQ_FLAGS, 0x40);
 
     // ========== LEITURA DOS DADOS RECEBIDOS ==========
-    // Obtém o número de bytes recebidos
-    // IMPORTANTE: No modo implícito, este valor deve corresponder ao payload definido (10 bytes)
+    // Obtï¿½m o nï¿½mero de bytes recebidos
+    // IMPORTANTE: No modo implï¿½cito, este valor deve corresponder ao payload definido (10 bytes)
     uint8_t len = sx127x_read_reg(REG_RX_NB_BYTES);
     
-    // Aponta o ponteiro FIFO para o endereço atual de recepção
+    // Aponta o ponteiro FIFO para o endereï¿½o atual de recepï¿½ï¿½o
     sx127x_write_reg(REG_FIFO_ADDR_PTR, sx127x_read_reg(0x10)); // FifoRxCurrentAddr
 
-    // ========== EXTRAÇÃO DOS DADOS DO FIFO ==========
-    // Lê os dados do FIFO para o buffer de destino
+    // ========== EXTRAï¿½ï¿½O DOS DADOS DO FIFO ==========
+    // Lï¿½ os dados do FIFO para o buffer de destino
     // Limita a leitura ao tamanho do buffer para evitar overflow
     for (int i = 0; i < len && i < max_len - 1; i++) {
         buf[i] = sx127x_read_reg(REG_FIFO);
     }
     buf[len] = '\0';  // Adiciona terminador de string
 
-    return true;  // Recepção bem-sucedida
+    return true;  // Recepï¿½ï¿½o bem-sucedida
 }
