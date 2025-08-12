@@ -56,8 +56,8 @@ void vTaskLoRaTX(void *pvParameters) {
         // CSV compacto: TAG,TempAHT,UmidAHT,Press_kPa,SEQ
         // Ex.: TS,25.31,61.20,100.84,123
         int n = snprintf(payload, sizeof(payload),
-                         "TS,%.2f,%.2f,%.2f,%lu",
-                         ta, ua, pb, (unsigned long)seq++);
+                         "TS,%.2f,%.2f,%.2f",
+                         ta, ua, pb);
 
         if (n <= 0 || n >= (int)sizeof(payload)) {
             printf("[LoRaTX] ERRO: payload maior que o buffer (%d).\n", n);
